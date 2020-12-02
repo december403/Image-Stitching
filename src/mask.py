@@ -2,7 +2,7 @@ from cv2 import cv2
 import numpy as np
 
 class Mask():
-    def __init__(self, final_result, warp_tar_img, shift_ref_img):
+    def __init__(self, warp_tar_img, shift_ref_img):
         self.overlap = None
         self.tar = None
         self.ref = None
