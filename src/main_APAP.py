@@ -17,7 +17,7 @@ with open('./data/matching_pairs/GMS_matching_pair.npy', 'rb') as f:
     dst_pts = np.load(f)
 
 
-stitcher = APAP_Stitcher(tar_img, ref_img, src_pts, dst_pts, grid_size=50, scale_factor=15)
+stitcher = APAP_Stitcher(tar_img, ref_img, src_pts, dst_pts, grid_size=30, scale_factor=15)
 
 stitcher.homoMat.constructGlobalMat(stitcher.src_pts, stitcher.dst_pts)
 stitcher.homoMat.constructLocalMat(src_pts, stitcher.grids, 15)
@@ -40,7 +40,7 @@ start_time = time.time()
 
 cv2.warpPerspective(tar_img, shift@H, dsize=(x,y), dst=warp_tar_img, borderMode=cv2.BORDER_TRANSPARENT)
 cv2.warpPerspective(ref_img, shift, dsize=(x,y), dst=warp_ref_img, borderMode=cv2.BORDER_TRANSPARENT)
-mask = Mask(warp_tar_img,warp_tar_img,warp_ref_img)
+mask = Mask(warp_tar_img,warp_ref_img)
 
 grid_num = stitcher.grids.number
 for idx in stitcher.homoMat.non_global_homo_mat_lst:
@@ -66,8 +66,8 @@ result[mask.ref_nonoverlap >0] = warp_ref_img[mask.ref_nonoverlap>0]
 result[mask.tar_nonoverlap >0] = warp_tar_img[mask.tar_nonoverlap>0]
 
 # print(result.shape)
-cv2.imwrite('./temp/warped_reference.jpg',warp_ref_img)
-cv2.imwrite('./temp/warped_target.jpg',warp_tar_img)
-cv2.imwrite('./temp/simple_average_result.jpg',result)
+cv2.imwrite('./temp/warped_reference.png',warp_ref_img)
+cv2.imwrite('./temp/warped_target.png',warp_tar_img)
+cv2.imwrite('./temp/simple_average_result.png',result)
 
 

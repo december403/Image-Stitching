@@ -9,9 +9,12 @@ class Mask():
         # self.void = None
         self.tar_nonoverlap = None
         self.ref_nonoverlap = None
-        self.constructMask(warp_tar_img,shift_ref_img)
+        self.overlap_edge_in_tar = None
+        self.overlap_edge_in_ref = None
+        self.overlap_edge = None
+        self.__constructMask(warp_tar_img,shift_ref_img)
 
-    def constructMask(self, warped_tar_img, warped_ref_img):
+    def __constructMask(self, warped_tar_img, warped_ref_img):
         tar_img_gray = cv2.cvtColor(warped_tar_img,cv2.COLOR_BGR2GRAY)
         ref_img_gray = cv2.cvtColor(warped_ref_img,cv2.COLOR_BGR2GRAY)
         _, binary_tar_img = cv2.threshold(tar_img_gray,1,255,cv2.THRESH_BINARY)
@@ -23,15 +26,17 @@ class Mask():
         binary_ref_img = cv2.morphologyEx(binary_ref_img, cv2.MORPH_CLOSE, kernal)
         overlap = cv2.bitwise_and(binary_tar_img, binary_ref_img)
 
-        # cv2.imwrite('binary_tar_img.jpg', binary_tar_img)
-        # cv2.imwrite('binary_ref_img.jpg', binary_ref_img)
-        # cv2.imwrite('overlap_img.jpg', overlap)
+        kernal = np.ones((3,3), np.int8)
+        overlap_erode = cv2.morphologyEx(overlap, cv2.MORPH_ERODE, kernal)
+        overlap_edge = overlap - overlap_erode
+        cv2.imwrite('./edge.png',overlap_edge)
 
         self.overlap = overlap
         self.tar = binary_tar_img
         self.ref = binary_ref_img
         self.tar_nonoverlap = binary_tar_img - overlap
         self.ref_nonoverlap = binary_ref_img - overlap
+        self.overlap_edge = overlap_edge
         # self.void = np.ones()
 
         

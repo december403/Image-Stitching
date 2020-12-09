@@ -1,42 +1,68 @@
 import numpy as np
 from cv2 import cv2
 from mask import Mask
-import time
 from node import Node
+import pandas as pd
+
+
+import time
 
 class MaskedSLIC():
-    def __init__(self, img, mask, method=cv2.ximgproc.SLIC, region_size=50):
+    def __init__(self, img, ROI, method=cv2.ximgproc.SLIC, region_size=50):
 
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
-        img = cv2.GaussianBlur(img, (5, 5), 0)
-        img[np.invert(mask>0)] = 0
-
-        self.__superpixel = cv2.ximgproc.createSuperpixelSLIC(
-            img, algorithm=method, region_size=region_size)
-        self.__superpixel.iterate(10)
-        self.__superpixel.enforceLabelConnectivity(25)
-
-        numOfPixel = self.__superpixel.getNumberOfSuperpixels()
-        contour_mask = self.__superpixel.getLabelContourMask()
-        label = self.__superpixel.getLabels()
-
-        masked_label = np.ones(label.shape) * (-1)
-        masked_label[mask>0] = label[mask>0]
-
-        masked_contour = np.copy(contour_mask)
-        # masked_contour[mask==0] = 0
-
-        new_number = 0
-        for idx in range(numOfPixel):
-            if np.any(masked_label==idx):
-                masked_label[masked_label==idx] = new_number
-                new_number += 1
-
-        self.mask = masked_label
-        self.numOfPixel = new_number
-        self.masked_contour = masked_contour
+        superpixel = cv2.ximgproc.createSuperpixelSLIC(
+            img, algorithm=method, region_size=region_size, ruler=30)
+        superpixel.iterate()
+        superpixel.enforceLabelConnectivity(25)
+        contour_mask = superpixel.getLabelContourMask()
+        contour_mask[ROI==0] = 0
+        
+        labels = superpixel.getLabels()
+        labels[ROI==0] = -1
+        remainded_labels_idx = np.unique(labels)
+        numOfPixel = len(remainded_labels_idx) # include non-overlap superpixel
 
 
+        self.labels_position = self.__get_labels_position(labels)
+        self.__remap_labels(labels)
+        self.labels = labels
+        self.numOfPixel = numOfPixel
+        self.contour_mask = contour_mask
+        self.idxsOfpixel = remainded_labels_idx
+        self.adjacent_pairs = self.__construct_adjacency(labels)
+
+
+    def __get_labels_position(self,labels):
+        data = labels.ravel()
+        f = lambda x: np.unravel_index(x.index, labels.shape)
+        temp = pd.Series(data).groupby(data).apply(f)
+        temp = temp.reset_index(drop=True)
+        return temp
+
+    def __remap_labels(self, labels):
+        for idx, (rows, cols) in enumerate(self.labels_position):
+            labels[rows, cols] = idx
+
+    def __construct_adjacency(self, labels):
+        h,w = labels.shape[0:2]
+
+        right_adjacent = np.zeros( ( (h-1),(w-1), 2), dtype=np.int32  )
+        right_adjacent[:,:,0] = labels[0:h-1, 0:w-1]
+        right_adjacent[:,:,1] = labels[0:h-1, 1:w]
+        right_adjacent = right_adjacent.reshape((-1,2))
+
+        bottom_adjacent = np.zeros( ( (h-1),(w-1), 2), dtype=np.int32   )
+        bottom_adjacent[:,:,0] = labels[0:h-1, 0:w-1]
+        bottom_adjacent[:,:,1] = labels[1:h, 0:w-1]
+        bottom_adjacent = bottom_adjacent.reshape((-1,2))    
+
+
+        adjacent_pairs = np.vstack((right_adjacent,bottom_adjacent))
+        adjacent_pairs = np.unique(adjacent_pairs, axis=0)
+        adjacent_pairs = adjacent_pairs[ np.invert( np.equal(adjacent_pairs[:,0], adjacent_pairs[:,1]) ) ]
+        adjacent_pairs = np.vstack((adjacent_pairs,adjacent_pairs[:,-1::-1]))
+
+        return adjacent_pairs
 
 
 
@@ -45,19 +71,27 @@ class MaskedSLIC():
 
 
 
-#     tar_img[maskedSLIC.mask==idx] = (np.random.randint(0,256),np.random.randint(0,256),np.random.randint(0,256))
+
+
 start_time = time.time()
-tar_img = cv2.imread('./data/processed_image/warped_target.jpg')
-ref_img = cv2.imread('./data/processed_image/warped_reference.jpg')
+
+tar_img = cv2.imread('./data/processed_image/warped_target.png')
+ref_img = cv2.imread('./data/processed_image/warped_reference.png')
 mask = Mask(tar_img, ref_img)
 maskedSLIC = MaskedSLIC(tar_img, mask.overlap, region_size=100)
 
-# for idx in range(maskedSLIC.numOfPixel):
-#     tar_img[maskedSLIC.mask==idx] = (np.random.randint(0,256),np.random.randint(0,256),np.random.randint(0,256))
 
-tar_img[maskedSLIC.masked_contour>0] = (0,255,0)
-print(f'{time.time() - start_time} sec elapse')
-cv2.imwrite('slic.png', tar_img)
-if ref_img is None:
-    print('fuck')
+
+for (rows, cols) in maskedSLIC.labels_position:
+    tar_img[rows, cols] = np.random.randint(0,256,size=(1,3))
+
+cv2.imwrite('./slic_pandas.png',tar_img)
+print(time.time() - start_time)
+print(f'number of pixel is :{maskedSLIC.numOfPixel}')
+
+
+
+
+
+
 
