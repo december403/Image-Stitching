@@ -1,7 +1,6 @@
 import numpy as np
 from cv2 import cv2
 from mask import Mask
-from node import Node
 import pandas as pd
 
 
@@ -19,16 +18,13 @@ class MaskedSLIC():
         
         labels = superpixel.getLabels()
         labels[ROI==0] = -1
-        remainded_labels_idx = np.unique(labels)
-        numOfPixel = len(remainded_labels_idx) # include non-overlap superpixel
 
 
         self.labels_position = self.__get_labels_position(labels)
         self.__remap_labels(labels)
         self.labels = labels
-        self.numOfPixel = numOfPixel
+        self.numOfPixel = np.max(labels) + 1
         self.contour_mask = contour_mask
-        self.idxsOfpixel = remainded_labels_idx
         self.adjacent_pairs = self.__construct_adjacency(labels)
 
 
@@ -73,21 +69,7 @@ class MaskedSLIC():
 
 
 
-start_time = time.time()
 
-tar_img = cv2.imread('./data/processed_image/warped_target.png')
-ref_img = cv2.imread('./data/processed_image/warped_reference.png')
-mask = Mask(tar_img, ref_img)
-maskedSLIC = MaskedSLIC(tar_img, mask.overlap, region_size=100)
-
-
-
-for (rows, cols) in maskedSLIC.labels_position:
-    tar_img[rows, cols] = np.random.randint(0,256,size=(1,3))
-
-cv2.imwrite('./slic_pandas.png',tar_img)
-print(time.time() - start_time)
-print(f'number of pixel is :{maskedSLIC.numOfPixel}')
 
 
 

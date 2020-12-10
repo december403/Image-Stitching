@@ -6,11 +6,10 @@ class Mask():
         self.overlap = None
         self.tar = None
         self.ref = None
-        # self.void = None
         self.tar_nonoverlap = None
         self.ref_nonoverlap = None
-        self.overlap_edge_in_tar = None
-        self.overlap_edge_in_ref = None
+        self.tar_overlap_edge = None
+        self.ref_overlap_edge = None
         self.overlap_edge = None
         self.__constructMask(warp_tar_img,shift_ref_img)
 
@@ -26,18 +25,29 @@ class Mask():
         binary_ref_img = cv2.morphologyEx(binary_ref_img, cv2.MORPH_CLOSE, kernal)
         overlap = cv2.bitwise_and(binary_tar_img, binary_ref_img)
 
+        tar_nonoverlap = binary_tar_img - overlap
+        ref_nonoverlap = binary_ref_img - overlap
+
         kernal = np.ones((3,3), np.int8)
         overlap_erode = cv2.morphologyEx(overlap, cv2.MORPH_ERODE, kernal)
         overlap_edge = overlap - overlap_erode
-        cv2.imwrite('./edge.png',overlap_edge)
+        
+        tar_overlap_edge = cv2.bitwise_and(overlap_edge, cv2.morphologyEx(tar_nonoverlap, cv2.MORPH_DILATE, kernal))
+        ref_overlap_edge = cv2.bitwise_and(overlap_edge, cv2.morphologyEx(ref_nonoverlap, cv2.MORPH_DILATE, kernal))
+
 
         self.overlap = overlap
         self.tar = binary_tar_img
         self.ref = binary_ref_img
-        self.tar_nonoverlap = binary_tar_img - overlap
-        self.ref_nonoverlap = binary_ref_img - overlap
+        self.tar_nonoverlap = tar_nonoverlap
+        self.ref_nonoverlap = ref_nonoverlap
         self.overlap_edge = overlap_edge
-        # self.void = np.ones()
+        self.tar_overlap_edge = tar_overlap_edge
+        self.ref_overlap_edge = ref_overlap_edge
 
+
+        # cv2.imwrite('./edge.png',overlap_edge)
+        # cv2.imwrite('./tar_edge.png',self.tar_overlap_edge)
+        # cv2.imwrite('./ref_edge.png',self.ref_overlap_edge)
         
 
