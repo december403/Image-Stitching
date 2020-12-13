@@ -1,7 +1,7 @@
 import numpy as np
 
 class Vertex():
-    def __init__(self, label, SLIC, mask):
+    def __init__(self, label, SLIC, mask, weight_map):
         self.label = label
         self.x_coordi = SLIC.labels_position[label][1]
         self.y_coordi = SLIC.labels_position[label][0]
@@ -9,6 +9,7 @@ class Vertex():
         self.adjacent_vertices = self.__find_adjcent_vertices(label, SLIC)
         self.is_on_tar_edge = self.__is_on_tar_edge(label, SLIC, mask)
         self.is_on_ref_edge = self.__is_on_ref_edge(label, SLIC, mask)
+        self.weight = self.__calculate_weight(weight_map)
 
     def __is_on_tar_edge(self, label, SLIC, mask):
         tar_edge = mask.tar_overlap_edge
@@ -30,4 +31,7 @@ class Vertex():
         adjacent_labels = np.delete( adjacent_labels, adjacent_labels==0 ) 
 
         return adjacent_labels
+
+    def __calculate_weight(self, weight_map):
+        return np.sum(weight_map[self.y_coordi, self.x_coordi]) / self.size
 

@@ -8,3 +8,4 @@ image/
 src/__pycache__/
 
 *.pkl
+*.jpeg

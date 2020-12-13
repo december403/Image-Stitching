@@ -4,7 +4,6 @@ from mask import Mask
 import pandas as pd
 
 
-import time
 
 class MaskedSLIC():
     def __init__(self, img, ROI, method=cv2.ximgproc.SLIC, region_size=50):
