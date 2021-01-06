@@ -10,9 +10,10 @@ start_time = time.time()
 tar_img = cv2.imread('./data/processed_image/warped_target.png')
 ref_img = cv2.imread('./data/processed_image/warped_reference.png')
 mask = Mask(tar_img, ref_img)
-maskedSLIC = MaskedSLIC(tar_img, mask.overlap, region_size=30)
+maskedSLIC = MaskedSLIC(ref_img, mask.overlap, region_size=20)
 
-
+# for i in maskedSLIC.adjacent_pairs[0]:
+#     print(i)
 
 # for (rows, cols) in maskedSLIC.labels_position:
 #     tar_img[rows, cols] = np.random.randint(0,256,size=(1,3))

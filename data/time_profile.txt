@@ -1,0 +1,24 @@
+CPU Version
+200000 key points per image
+ORB matching pairs saved
+There are 53822 pairs matching pairs.
+There are 4101 pairs matching pairs after RANSAC. (projection error=5)
+Process finished --- 101.61957097053528 seconds ---
+
+
+grid size = 30
+grids number = 22326
+Calculate global and local homography matrices time: 54.31699
+warping time: 43.99810
+
+
+Masked SLIC
+53.77090358734131
+number of pixel is :7503
+
+
+finished weight map calculation   in   19.095
+finished graph construction   in    7.977
+finished graph cut   in    0.020
+finished stitching   in    3.902
+

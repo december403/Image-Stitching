@@ -187,12 +187,7 @@ def findMatchPair_ORB(tar_img, ref_img, ptsNum=10000, save=False, fileName='ORB_
         dst_pts = np.array([ref_kp[match.queryIdx].pt for idx,
                             match in enumerate(matches) if mask[idx] == 1])
 
-    if save:
-        with open(fileName, 'wb') as f:
-            np.save(f, src_pts)
-            np.save(f, dst_pts)
 
-        print('ORB matching pairs saved')
     return src_pts, dst_pts, tar_kp, ref_kp, matches, mask
 
 
