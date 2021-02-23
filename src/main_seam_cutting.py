@@ -13,9 +13,9 @@ import argparse
 
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('out_file_name')
-args = parser.parse_args()
+# parser = argparse.ArgumentParser()
+# parser.add_argument('out_file_name')
+# args = parser.parse_args()
 
 
 
@@ -25,16 +25,16 @@ start = time.time()
 tar_img = cv2.imread('./warped_target.png')
 ref_img = cv2.imread('./warped_reference.png')
 mask = Mask(tar_img, ref_img)
-cv2.imwrite('overlap_mask.png', mask.overlap)
+# cv2.imwrite('overlap_mask.png', mask.overlap)
 
 weight_map = calculate_weight_map(tar_img, ref_img, mask)
 
-cv2.imwrite('weight_map.png', weight_map/np.max(weight_map)*255)
+# cv2.imwrite('weight_map.png', weight_map/np.max(weight_map)*255)
 
 print(f'finished weight map calculation   in {time.time()-start:8.3f}')
 start = time.time()
 # exit(0)
-maskedSLIC = MaskedSLIC(ref_img, mask.overlap, region_size=10)
+maskedSLIC = MaskedSLIC(ref_img, mask.overlap, region_size=20)
 print(f'finished SLIC calculation   in {time.time()-start:8.3f}')
 start = time.time()
 
@@ -87,8 +87,9 @@ for idx, vertex,in enumerate(verteices_lst):
 
 
 
-
-cv2.imwrite(args.out_file_name, result)
+cv2.imwrite('result.png', result)
+cv2.imwrite('result_from_reference.png', mask_seam + mask.ref_nonoverlap) 
+# cv2.imwrite(args.out_file_name, result)
 result[mask.overlap_edge>0] = (0,255,0)
 # result[maskedSLIC.contour_mask>0] = (0,255,0)
 # cv2.imwrite('result_pixel.png', result)
@@ -101,4 +102,20 @@ result[mask_seam>0] = (0,0,255)
 cv2.imwrite('result_pixel_seam.png', result)
 
 print(f'finished stitching   in {time.time()-start:8.3f}')
+
+'''
+Write seam mask to .png file
+'''
+
+cv2.imwrite('seam_mask.png',mask_seam)
+cv2.imwrite('overlap.png', mask.overlap)
+# cv2.imwrite('overlap_edge.png', mask.overlap_edge)
+# cv2.imwrite('reference_overlap_edge.png', mask.ref_overlap_edge)
+# cv2.imwrite('target_overlap_edge.png', mask.tar_overlap_edge)
+# cv2.imwrite('target_nonoverlap.png', mask.tar_nonoverlap)
+# cv2.imwrite('reference_nonoverlap.png', mask.ref_nonoverlap)
+
+
+
+
 

@@ -2,7 +2,7 @@ import numpy as np
 from cv2 import cv2
 from mask import Mask
 import pandas as pd
-from skimage.segmentation import find_boundaries
+from skimage.segmentation import find_boundaries#, slic
 from cuda_slic.slic import slic 
 from numba import jit
 

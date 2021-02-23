@@ -6,18 +6,21 @@ from mask import Mask
 from ImgMatcher import ImgMatcher
 import argparse
 
-parser = argparse.ArgumentParser()
-parser.add_argument('target_image')
-parser.add_argument('reference_image')
+# parser = argparse.ArgumentParser()
+# parser.add_argument('target_image')
+# parser.add_argument('reference_image')
 
-args = parser.parse_args()
+# args = parser.parse_args()
 
+tar_img = cv2.imread('image/level0/DJI_0016_dark.png')
+ref_img = cv2.imread('image/level0/DJI_0015.png')
 
-
-# ref_img = cv2.imread('./image/UAV/DJI_0003.JPG')
-# tar_img = cv2.imread('./image/UAV/DJI_0004.JPG')
-ref_img = cv2.imread(args.reference_image)
-tar_img = cv2.imread(args.target_image)
+# ref_img = cv2.imread('image/paper_test_image/1.jpg')
+# tar_img = cv2.imread('image/paper_test_image/2.jpg')
+# ref_img = cv2.imread(args.reference_image)
+# tar_img = cv2.imread(args.target_image)
+# ref_img = cv2.imread('/home/zer0/image_stitching/2.jpg')
+# tar_img = cv2.imread('/home/zer0/image_stitching/1.jpg')
 
 IM = ImgMatcher(tar_img,ref_img)
 IM.detectAKAZE()
@@ -77,8 +80,15 @@ result[mask.overlap>0] = cv2.addWeighted(warp_tar_img,0.5,warp_ref_img,0.5,0)[ma
 result[mask.ref_nonoverlap >0] = warp_ref_img[mask.ref_nonoverlap>0]
 result[mask.tar_nonoverlap >0] = warp_tar_img[mask.tar_nonoverlap>0]
 
+# new_h, new_w = warp_ref_img.shape[0:2]
+# new_h = new_h//8
+# new_w = new_w//8
+# warp_ref_img = cv2.resize(warp_ref_img,(new_w,new_h))
+# warp_tar_img = cv2.resize(warp_tar_img,(new_w,new_h))
 cv2.imwrite('./warped_reference.png',warp_ref_img)
 cv2.imwrite('./warped_target.png',warp_tar_img)
 # cv2.imwrite('./simple_average_result.png',result)
-
-
+np.save('save_H.npy',H)
+np.save('save_Shift.npy',shift)
+np.save('save_ref_4_corners_xy.npy', np.array( [ [0,0], [0,ref_img.shape[0]], [ref_img.shape[1],0], [ref_img.shape[1],ref_img.shape[0]] ] ) )
+np.save('save_tar_4_corners_xy.npy', np.array( [ [0,0], [0,tar_img.shape[0]], [tar_img.shape[1],0], [tar_img.shape[1],tar_img.shape[0]] ] ) )

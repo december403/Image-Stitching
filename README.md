@@ -2,7 +2,7 @@
 Image Stitching Project
 
 ## Requirement
-* numpy                 1.19.4
+* numpy                 1.19.5
 * opencv-contrib-python 4.4.0.46
 * opencv-python         4.4.0.46
 * pandas                1.1.4
